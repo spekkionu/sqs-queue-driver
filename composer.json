@@ -1,0 +1,25 @@
+{
+    "name": "spekkionu/sqs-queue-driver",
+    "description": "AWS SQS driver for pmg/queue",
+    "type": "library",
+    "require": {
+        "pmg/queue": "2.*"
+    },
+     "require-dev": {
+        "phpunit/phpunit": "~4.5.0",
+        "mockery/mockery": "~0.9.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spekkionu\\PMG\\Queue\\Sqs\\": "src/Sqs"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jonathan Bernardi",
+            "email": "jon@jonbernardi.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
