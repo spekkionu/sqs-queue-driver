@@ -26,5 +26,4 @@ $sqsClient = new SqsClient([
 
 $serializer = new NativeSerializer();
 $driver = new SqsDriver($sqsClient, $serializer);
-
 ```
