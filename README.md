@@ -8,3 +8,23 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spekkionu/sqs-queue-driver/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spekkionu/sqs-queue-driver/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/spekkionu/sqs-queue-driver/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/spekkionu/sqs-queue-driver/?branch=master)
 
+```php
+<?php
+use Aws\Sqs\SqsClient;
+use PMG\Queue\Serializer\NativeSerializer;
+Spekkionu\PMG\Queue\Sqs\Driver\SqsDriver;
+
+$sqsClient = new SqsClient([
+    'credentials' => [
+        'key' => 'KEY',
+        'secret' => 'SECRECT'
+    ],
+    'region' => 'us-east-1',
+    'retries' => 3,
+    'version' => '2012-11-05'
+]);
+
+$serializer = new NativeSerializer();
+$driver = new SqsDriver($sqsClient, $serializer);
+
+```

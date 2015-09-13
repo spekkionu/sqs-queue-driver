@@ -3,7 +3,8 @@
     "description": "AWS SQS driver for pmg/queue",
     "type": "library",
     "require": {
-        "pmg/queue": "2.*"
+        "pmg/queue": "2.*",
+        "aws/aws-sdk-php": "3.*"
     },
      "require-dev": {
         "phpunit/phpunit": "~4.5.0",
