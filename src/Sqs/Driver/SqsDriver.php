@@ -2,7 +2,6 @@
 namespace Spekkionu\PMG\Queue\Sqs\Driver;
 
 use Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope;
-use Aws\Sqs\Exception\SqsException;
 use Aws\Sqs\SqsClient;
 use PMG\Queue\Driver\AbstractPersistanceDriver;
 use PMG\Queue\Exception;
@@ -131,7 +130,7 @@ class SqsDriver extends AbstractPersistanceDriver
         }
 
         $result = $this->client->getCommand('getQueueUrl', array('QueueName' => $queueName));
-        
+
         if ($result && $queueUrl = $result['QueueUrl']) {
             return $this->queueUrls[$queueName] = $queueUrl;
         }
