@@ -82,6 +82,31 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($receiptHandle, $env->getReceiptHandle());
     }
 
+    public function testDequeueWithNoResult()
+    {
+        $queueUrls = [
+            'q' => 'http://queueurl.com'
+        ];
+        $messageId = 'messageid';
+        $messageBody = 'message body';
+        $receiptHandle = 'ReceiptHandle';
+        $serializedMessageBody = json_encode($messageBody);
+        $message = new \PMG\Queue\SimpleMessage('SimpleMessage', $messageBody);
+        $wrapped = new \PMG\Queue\DefaultEnvelope($message, 1);
+        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $sqsclient->shouldReceive('receiveMessage')->with([
+                'QueueUrl' => $queueUrls['q'],
+                'MaxNumberOfMessages' => 1,
+                'AttributeNames' => ['ApproximateReceiveCount']
+            ])->once()->andReturn(null);
+        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $serializer->shouldNotReceive('unserialize');
+    
+        
+        $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
+        $this->assertNull($driver->dequeue('q'));
+    }
+
     public function testAck()
     {
         $queueUrls = [

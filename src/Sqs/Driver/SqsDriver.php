@@ -129,18 +129,9 @@ class SqsDriver extends AbstractPersistanceDriver
         if (array_key_exists($queueName, $this->queueUrls)) {
             return $this->queueUrls[$queueName];
         }
-        try {
-            $result = $this->client->getCommand('getQueueUrl', array('QueueName' => $queueName));
-        } catch (SqsException $exception) {
-            if ($exception->getExceptionCode() === 'AWS.SimpleQueueService.NonExistentQueue') {
-                throw new SqsException(
-                    "The queue {$queueName} is neither aliased locally to an SQS URL nor could it be resolved by SQS.",
-                    $exception->getCode(),
-                    $exception
-                );
-            }
-            throw $exception;
-        }
+
+        $result = $this->client->getCommand('getQueueUrl', array('QueueName' => $queueName));
+        
         if ($result && $queueUrl = $result['QueueUrl']) {
             return $this->queueUrls[$queueName] = $queueUrl;
         }
