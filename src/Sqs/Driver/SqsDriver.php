@@ -129,7 +129,7 @@ class SqsDriver extends AbstractPersistanceDriver
             return $this->queueUrls[$queueName];
         }
 
-        $result = $this->client->getCommand('getQueueUrl', array('QueueName' => $queueName));
+        $result = $this->client->getQueueUrl(array('QueueName' => $queueName));
 
         if ($result && $queueUrl = $result['QueueUrl']) {
             return $this->queueUrls[$queueName] = $queueUrl;

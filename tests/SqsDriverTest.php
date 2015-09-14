@@ -187,7 +187,7 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $queueUrls = [];
         $url = 'queueurl';
         $sqsclient = m::mock('Aws\Sqs\SqsClient');
-        $sqsclient->shouldReceive('getCommand')->with('getQueueUrl', ['QueueName' => 'b'])->once()->andReturn(['QueueUrl' => $url]);
+        $sqsclient->shouldReceive('getQueueUrl')->with(['QueueName' => 'b'])->once()->andReturn(['QueueUrl' => $url]);
         $serializer = m::mock('PMG\Queue\Serializer\Serializer');
         
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
@@ -200,7 +200,7 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
             'q' => 'http://queueurl.com'
         ];
         $sqsclient = m::mock('Aws\Sqs\SqsClient');
-        $sqsclient->shouldReceive('getCommand')->with('getQueueUrl', ['QueueName' => 'b'])->once()->andReturn(null);
+        $sqsclient->shouldReceive('getQueueUrl')->with(['QueueName' => 'b'])->once()->andReturn(null);
         $serializer = m::mock('PMG\Queue\Serializer\Serializer');
 
         $this->setExpectedException('InvalidArgumentException', "Queue url for queue b not found");
