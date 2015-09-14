@@ -10,6 +10,3 @@ before_script:
   - php composer.phar install --dev
 
 script: vendor/bin/phpunit --configuration phpunit.travis.xml --coverage-text
-after_script:
-    - wget -o ocular.phar https://scrutinizer-ci.com/ocular.phar
-    - php ocular.phar code-coverage:upload --format=php-clover coverage.clover --repository=g/spekkionu/sqs-queue-driver
