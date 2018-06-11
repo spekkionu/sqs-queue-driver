@@ -1,12 +1,13 @@
 <?php
 namespace Spekkionu\PMG\Queue\Test;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope;
 use \Mockery as m;
 
-class SqsEnvelopeTest extends PHPUnit_Framework_TestCase
+class SqsEnvelopeTest extends TestCase
 {
+    use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
     public function tearDown()
     {

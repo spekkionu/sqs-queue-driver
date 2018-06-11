@@ -1,22 +1,18 @@
 <?php
 namespace Spekkionu\PMG\Queue\Test;
 
-use PHPUnit_Framework_TestCase;
+use Mockery;
+use PHPUnit\Framework\TestCase;
 use Spekkionu\PMG\Queue\Sqs\Driver\SqsDriver;
-use \Mockery as m;
 
-class SqsDriverTest extends PHPUnit_Framework_TestCase
+class SqsDriverTest extends TestCase
 {
-
-    public function tearDown()
-    {
-        m::close();
-    }
+    use \Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
     public function testConstructor()
     {
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
         $queueUrls = [];
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
 
@@ -31,14 +27,14 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $messageId = 'messageid';
         $messageBody = 'message body';
         $serializedMessageBody = json_encode($messageBody);
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldReceive('sendMessage')->with(['QueueUrl' => $queueUrls['q'], 'MessageBody' => $serializedMessageBody])->once()->andReturn(['MessageId' => $messageId]);
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
         $serializer->shouldReceive('serialize')->once()->andReturn($serializedMessageBody);
         
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
 
-        $message = m::mock('PMG\Queue\Message');
+        $message = Mockery::mock('PMG\Queue\Message');
 
         $env = $driver->enqueue('q', $message);
         $this->assertInstanceOf('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope', $env);
@@ -56,7 +52,7 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $serializedMessageBody = json_encode($messageBody);
         $message = new \PMG\Queue\SimpleMessage('SimpleMessage', $messageBody);
         $wrapped = new \PMG\Queue\DefaultEnvelope($message, 1);
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldReceive('receiveMessage')->with([
                 'QueueUrl' => $queueUrls['q'], 
                 'MaxNumberOfMessages' => 1, 
@@ -71,7 +67,7 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
                     ]
                 ]
             ]);
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
         $serializer->shouldReceive('unserialize')->with($serializedMessageBody)->once()->andReturn($wrapped);
     
         
@@ -93,13 +89,13 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $serializedMessageBody = json_encode($messageBody);
         $message = new \PMG\Queue\SimpleMessage('SimpleMessage', $messageBody);
         $wrapped = new \PMG\Queue\DefaultEnvelope($message, 1);
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldReceive('receiveMessage')->with([
                 'QueueUrl' => $queueUrls['q'],
                 'MaxNumberOfMessages' => 1,
                 'AttributeNames' => ['ApproximateReceiveCount']
             ])->once()->andReturn(null);
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
         $serializer->shouldNotReceive('unserialize');
     
         
@@ -113,12 +109,11 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
             'q' => 'http://queueurl.com'
         ];
         $receiptHandle = 'ReceiptHandle';
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldReceive('deleteMessage')->with(['QueueUrl' => $queueUrls['q'], 'ReceiptHandle' => $receiptHandle])->once();
-        $env = m::mock('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope');
+        $env = Mockery::mock('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope');
         $env->shouldReceive('getReceiptHandle')->once()->andReturn($receiptHandle);
-
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
         $driver->ack('q', $env);
     }
@@ -128,14 +123,13 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $queueUrls = [
             'q' => 'http://queueurl.com'
         ];
-        $receiptHandle = 'ReceiptHandle';
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldNotReceive('deleteMessage');
-        $env = m::mock('PMG\Queue\Envelope');
+        $env = Mockery::mock('PMG\Queue\Envelope');
         $env->shouldNotReceive('getReceiptHandle');
 
-        $this->setExpectedException('PMG\Queue\Exception\InvalidEnvelope');
+        $this->expectException('PMG\Queue\Exception\InvalidEnvelope');
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
         $driver->ack('q', $env);
     }
@@ -145,13 +139,13 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $queueUrls = [
             'q' => 'http://queueurl.com'
         ];
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
-        $env = m::mock('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope');
-        $env->shouldReceive('retry')->once()->andReturn('retried');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
+        $env = Mockery::mock('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope');
+        $env->shouldReceive('retry')->once()->andReturn($env);
 
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
-        $this->assertEquals('retried', $driver->retry('q', $env));
+        $this->assertEquals($env, $driver->retry('q', $env));
     }
 
     public function testFail()
@@ -160,14 +154,30 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
             'q' => 'http://queueurl.com'
         ];
         $receiptHandle = 'ReceiptHandle';
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldReceive('deleteMessage')->with(['QueueUrl' => $queueUrls['q'], 'ReceiptHandle' => $receiptHandle])->once();
-        $env = m::mock('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope');
+        $env = Mockery::mock('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope');
         $env->shouldReceive('getReceiptHandle')->once()->andReturn($receiptHandle);
 
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
         $driver->fail('q', $env);
+    }
+
+    public function testRelease()
+    {
+        $queueUrls = [
+            'q' => 'http://queueurl.com'
+        ];
+        $receiptHandle = 'ReceiptHandle';
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
+        $sqsclient->shouldReceive('deleteMessage')->with(['QueueUrl' => $queueUrls['q'], 'ReceiptHandle' => $receiptHandle])->once();
+        $env = Mockery::mock('Spekkionu\PMG\Queue\Sqs\Envelope\SqsEnvelope');
+        $env->shouldReceive('getReceiptHandle')->once()->andReturn($receiptHandle);
+
+        $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
+        $driver->release('q', $env);
     }
 
     public function testGetQueueUrl()
@@ -175,8 +185,8 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $queueUrls = [
             'q' => 'http://queueurl.com'
         ];
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
         
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
         $this->assertEquals($queueUrls['q'], $driver->getQueueUrl('q'));
@@ -186,9 +196,9 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
     {
         $queueUrls = [];
         $url = 'queueurl';
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldReceive('getQueueUrl')->with(['QueueName' => 'b'])->once()->andReturn(['QueueUrl' => $url]);
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
         
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
         $this->assertEquals($url, $driver->getQueueUrl('b'));
@@ -199,11 +209,11 @@ class SqsDriverTest extends PHPUnit_Framework_TestCase
         $queueUrls = [
             'q' => 'http://queueurl.com'
         ];
-        $sqsclient = m::mock('Aws\Sqs\SqsClient');
+        $sqsclient = Mockery::mock('Aws\Sqs\SqsClient');
         $sqsclient->shouldReceive('getQueueUrl')->with(['QueueName' => 'b'])->once()->andReturn(null);
-        $serializer = m::mock('PMG\Queue\Serializer\Serializer');
+        $serializer = Mockery::mock('PMG\Queue\Serializer\Serializer');
 
-        $this->setExpectedException('InvalidArgumentException', "Queue url for queue b not found");
+        $this->expectException('InvalidArgumentException', "Queue url for queue b not found");
         
         $driver = new SqsDriver($sqsclient, $serializer, $queueUrls);
         $driver->getQueueUrl('b');
